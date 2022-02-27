@@ -1,10 +1,27 @@
 syntax = "proto3";
+import "google/protobuf/empty.proto";
 
 package demo_user;
 
 service UserSvc {
+    rpc addUser ( google.protobuf.Empty ) returns ( AddUserResponse );
     rpc register (RegisterRequest) returns (UserResponse);
     rpc subNewRegister (RegisterSub) returns (stream RegisterSubResponse) {};
+    rpc upload (stream File) returns ( ResponseUpload );
+}
+
+
+message File {
+    bytes content = 1;
+}
+
+message ResponseUpload {
+    string message = 1;
+}
+
+message AddUserResponse {
+    string message = 1;
+    repeated int32 currentUsers = 2;
 }
 
 message RegisterRequest {

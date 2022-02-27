@@ -15,6 +15,8 @@ let protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 // The protoDescriptor object has the full package hierarchy
 
 
+let currentUsers = [];
+
 
 ( async () => {
     let port = process.env.PORT || 50051;
@@ -23,6 +25,11 @@ let protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
     let server = new grpc.Server();
 
     server.addService(protoDescriptor.demo_user.UserSvc.service, {
+        addUser:(call, cb) => {
+            currentUsers = [...currentUsers, call.call.stream.id];
+     
+            cb(null, {"message":"added with success", currentUsers})
+        },
         register: (call, cb) => {
             const { name, email, password } = call.request;
 
@@ -37,6 +44,16 @@ let protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
                 call.write({"count": [2,2,4]});
                 call.end();
             }, 8000)
+        },
+        upload:(call, cb) => {
+            //console.log(call.call);
+            call.on('data', async payload => {
+                console.log(payload.data);
+            })
+
+            cb(null, {
+                "message":"OK"
+            })
         }
       });
     
