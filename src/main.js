@@ -49,7 +49,7 @@ let currentUsers = [];
             let all = fs.createWriteStream(__dirname + "/uploaded/generated.jpg")
             call.on('data', data => {
                 console.log("received data");
-                let { content } = data.content // chunk buffer
+                let { content } = data // chunk buffer
                 console.log(content);
                 all.write(content);
                 // all.write(data);
