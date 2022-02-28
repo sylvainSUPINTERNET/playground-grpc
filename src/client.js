@@ -15,21 +15,23 @@ let packageDefinition = protoLoader.loadSync(
 let userSvc = grpc.loadPackageDefinition(packageDefinition).demo_user.UserSvc;
 let client = new userSvc('localhost:50051',grpc.credentials.createInsecure());
 
-const readStream = fs.createReadStream(__dirname +'/mock/pic.jpg');
-readStream.on('data', (chunk) => {
-    // console.log(Uint8Array.from(chunk));
-    console.log(chunk);
-    let stream = client.upload({
-        content: chunk
-    }, (err, resp) => {
-        if ( err ) {
-            console.log(err);
-        }
-    });
-    // serviceCall.write({
-    //     chunk: Uint8Array.from(chunk)
-    // });
+const readStream = fs.createReadStream(__dirname +'/mock/pic.jpg', { highWaterMark: 15000 });
+const call = client.upload( (err, stats) => {
+    if ( err ) {
+        console.log(err)
+    }
+    
+    // message is from proto defined in response
+    console.log("Finish with response :", stats)
 });
+
+readStream.on("error", err => console.log(err));
+readStream.on("data", chunk => call.write({"content": chunk}));
+readStream.on("end", () => {
+    call.end()
+    console.log("client closed")
+});
+
 
 // client.register({
 //     name:"",

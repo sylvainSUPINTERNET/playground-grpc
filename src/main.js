@@ -1,7 +1,7 @@
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 let PROTO_PATH = __dirname + '/../protos/user/user.proto';
-
+const fs = require('fs');
 
 let packageDefinition = protoLoader.loadSync(
     PROTO_PATH,
@@ -46,13 +46,20 @@ let currentUsers = [];
             }, 8000)
         },
         upload:(call, cb) => {
-            //console.log(call.call);
-            call.on('data', async payload => {
-                console.log(payload.data);
-            })
-
-            cb(null, {
-                "message":"OK"
+            let all = fs.createWriteStream(__dirname + "/uploaded/generated.jpg")
+            call.on('data', data => {
+                console.log("received data");
+                let { content } = data.content // chunk buffer
+                console.log(content);
+                all.write(content);
+                // all.write(data);
+            });
+            call.on('end', () => {
+                console.log("end");
+                //all.end();
+                cb(null,{
+                    "message":"END",
+                })
             })
         }
       });
