@@ -15,7 +15,7 @@ let packageDefinition = protoLoader.loadSync(
 let userSvc = grpc.loadPackageDefinition(packageDefinition).demo_user.UserSvc;
 let client = new userSvc('localhost:50051',grpc.credentials.createInsecure());
 
-const readStream = fs.createReadStream(__dirname +'/mock/pic.jpg', { highWaterMark: 15000 });
+const readStream = fs.createReadStream(__dirname +'/mock/file_example_MP3_5MG.mp3', { highWaterMark: 15000 });
 const call = client.upload( (err, stats) => {
     if ( err ) {
         console.log(err)
@@ -26,7 +26,7 @@ const call = client.upload( (err, stats) => {
 });
 
 readStream.on("error", err => console.log(err));
-readStream.on("data", chunk => call.write({"content": chunk}));
+readStream.on("data", chunk => call.write({"content": chunk, "name": "lechest", "extension": "mp3"}));
 readStream.on("end", () => {
     call.end()
     console.log("client closed")
